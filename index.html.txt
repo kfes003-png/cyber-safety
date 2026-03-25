@@ -1,0 +1,31 @@
+0.系統版本:Windows11企業版 Ver.25H2
+*關閉UAC
+*開啟.NET Framework 3.5
+*開啟SMB 1.0直接傳輸
+*設定顯示器閒置5分鐘後關閉
+*設定電腦永不休眠
+*可選擇暫停自動更新260週
+*更改本機帳戶原則密碼有效期限42>永久
+*關閉記憶體完整性(核心隔離)
+*關閉資料加密(裝置安全性)
+1.安裝Office2024
+2.安裝7-ZIP解壓縮程式
+3.Acrobat Reader
+4.威力導演2025(all Pack)
+5.FileZilla
+6.Google Chrome
+7.HiCos3.1.1
+8.VLC MediaPlayer
+9.非常好色9
+10.公務雲設定
+*GRCA3憑證匯入
+*跨平台元件
+*快顯封鎖程式關閉
+11.Screen Recorder 4
+12.Inkscape
+13.Photoimpact X3
+14.趨勢防毒軟體(RuL$u061)
+15.EZ100PU驅動
+額外項目
+Acer Control Center
+用於檢視電腦硬體規格
