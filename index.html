@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>網路安全小達人：傳奇冒險 2.0</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/canvas-confetti/1.6.0/confetti.browser.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap');
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
+            color: #f8fafc;
+        }
+        .progress-bar {
+            transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .seal {
+            filter: grayscale(100%) brightness(0.5);
+            opacity: 0.3;
+            transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            font-size: 2.5rem;
+        }
+        .seal.unlocked {
+            filter: grayscale(0%) brightness(1);
+            opacity: 1;
+            transform: scale(1.4) rotate(-5deg);
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+        }
+        .certificate-border {
+            background: white;
+            padding: 4px;
+            background: linear-gradient(45deg, #f59e0b, #fef3c7, #b45309, #fef3c7, #f59e0b);
+            background-size: 400% 400%;
+            animation: goldFlow 10s ease infinite;
+        }
+        @keyframes goldFlow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .gold-text {
+            background: linear-gradient(to bottom, #92400e, #d97706, #92400e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 900;
+        }
+        .option-btn {
+            transition: all 0.25s;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .option-btn:hover {
+            background: rgba(59, 130, 246, 0.1);
+            border-color: #3b82f6;
+            transform: translateX(10px);
+        }
+        .glass {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        @media print {
+            .no-print { display: none; }
+            body { background: white; color: black; }
+            .certificate-border { animation: none; border: 15px solid #EAB308; }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center p-4 md:p-8">
+
+    <!-- 頂部進度面板 -->
+    <header class="w-full max-w-4xl no-print">
+        <div class="glass p-8 rounded-3xl shadow-2xl mb-8 relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500"></div>
+            <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+                <div>
+                    <h1 class="text-4xl font-black text-white mb-1 tracking-tighter">🛡️ 資安傳奇冒險 <span class="text-blue-400">2.0</span></h1>
+                    <p class="text-blue-200 font-medium">基於 2024《人工智慧基本法》草案設計</p>
+                </div>
+                <div class="flex gap-4">
+                    <div id="seal-0" class="seal">🛡️</div>
+                    <div id="seal-1" class="seal">⚖️</div>
+                    <div id="seal-2" class="seal">🤖</div>
+                    <div id="seal-3" class="seal">📷</div>
+                    <div id="seal-4" class="seal">🔒</div>
+                </div>
+            </div>
+            
+            <div class="mt-8">
+                <div class="flex justify-between text-xs font-bold text-blue-300 mb-2 uppercase tracking-widest">
+                    <span>Adventure Progress</span>
+                    <span id="progressText">0%</span>
+                </div>
+                <div class="w-full bg-white/10 rounded-full h-4 overflow-hidden p-1">
+                    <div id="progressBar" class="bg-gradient-to-r from-blue-500 to-cyan-400 h-full rounded-full progress-bar" style="width: 0%"></div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 遊戲互動區 -->
+    <main id="gameContainer" class="w-full max-w-4xl no-print">
+        <div class="bg-slate-900/50 backdrop-blur-xl rounded-[2.5rem] shadow-2xl p-8 md:p-16 min-h-[550px] flex flex-col justify-center border border-white/10">
+            
+            <!-- 初始畫面 -->
+            <div id="startScreen" class="text-center">
+                <div class="mb-10 inline-block relative">
+                    <div class="absolute inset-0 bg-blue-500 blur-3xl opacity-20 animate-pulse"></div>
+                    <span class="text-9xl relative z-10">⚔️</span>
+                </div>
+                <h2 class="text-4xl font-black text-white mb-6 tracking-tight">小六資安英雄試煉</h2>
+                <p class="text-slate-400 mb-10 text-xl leading-relaxed">台灣於 2024 年提出《人工智慧基本法》草案，<br>重視隱私、個資保護及勞工權益。你有信心通過考驗嗎？</p>
+                <div class="max-w-sm mx-auto mb-10">
+                    <input type="text" id="playerName" placeholder="輸入你的勇者名號" 
+                        class="w-full bg-white/5 border-2 border-white/10 rounded-2xl p-5 text-2xl text-center text-white focus:outline-none focus:border-blue-500 focus:bg-white/10 transition-all">
+                </div>
+                <button onclick="startGame()" class="px-16 py-5 bg-blue-600 hover:bg-blue-500 text-white font-black text-2xl rounded-2xl shadow-[0_0_30px_rgba(37,99,235,0.4)] transform hover:-translate-y-1 active:translate-y-1 transition-all">
+                    開始試煉
+                </button>
+            </div>
+
+            <!-- 題目畫面 -->
+            <div id="quizScreen" class="hidden">
+                <div class="flex items-center gap-4 mb-6">
+                    <span id="questionIcon" class="text-4xl bg-white/10 p-3 rounded-2xl">🧩</span>
+                    <div>
+                        <span id="questionCategory" class="text-sm font-bold text-blue-400 tracking-[0.3em] uppercase">Category</span>
+                        <div class="h-1 w-12 bg-blue-500 rounded-full mt-1"></div>
+                    </div>
+                </div>
+                <h2 id="questionText" class="text-2xl md:text-4xl font-bold text-white mb-10 leading-snug">載入中...</h2>
+                <div id="optionsContainer" class="grid gap-4">
+                    <!-- 選項 -->
+                </div>
+            </div>
+
+            <!-- 反饋畫面 -->
+            <div id="feedbackScreen" class="hidden text-center">
+                <div id="feedbackIcon" class="text-9xl mb-8 animate-bounce">✨</div>
+                <h2 id="feedbackTitle" class="text-5xl font-black mb-6">答對了！</h2>
+                <div class="bg-white/5 p-8 rounded-3xl mb-10 border border-white/10">
+                    <p id="feedbackText" class="text-slate-300 text-xl leading-relaxed">回饋文字</p>
+                </div>
+                <button id="nextBtn" class="px-20 py-5 bg-emerald-500 hover:bg-emerald-400 text-white font-black text-2xl rounded-2xl shadow-xl transition-all">
+                    解鎖成就
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- 終極華麗證書 -->
+    <div id="certificateScreen" class="hidden w-full max-w-5xl py-10">
+        <div class="certificate-border rounded-lg shadow-[0_0_100px_rgba(234,179,8,0.3)]">
+            <div id="certificateCapture" class="bg-white p-6 md:p-16 relative text-center overflow-hidden">
+                <!-- 底紋裝飾 -->
+                <div class="absolute inset-0 opacity-[0.03] pointer-events-none" style="background-image: radial-gradient(#000 2px, transparent 2px); background-size: 30px 30px;"></div>
+                
+                <div class="relative z-10 border-[16px] border-double border-yellow-700/20 p-8 md:p-16">
+                    <div class="flex justify-center mb-8">
+                        <div class="relative">
+                            <span class="text-8xl">🏅</span>
+                            <div class="absolute -inset-4 border-2 border-yellow-500 rounded-full animate-ping opacity-20"></div>
+                        </div>
+                    </div>
+
+                    <h2 class="text-6xl font-black gold-text mb-4 tracking-tighter">傳奇資安達人證書</h2>
+                    <p class="text-2xl text-gray-400 font-serif italic mb-12">LEGENDARY CYBER SECURITY EXPERT</p>
+                    
+                    <div class="mb-12">
+                        <p class="text-2xl text-gray-500 mb-6 font-medium">榮譽授予</p>
+                        <p id="certPlayerName" class="text-7xl font-black text-slate-900 border-b-8 border-yellow-500 inline-block px-12 pb-2 mb-4">名字</p>
+                    </div>
+                    
+                    <div class="max-w-3xl mx-auto mb-16">
+                        <p class="text-2xl text-slate-700 leading-relaxed font-bold">
+                            該員於西元 2024 年成功通過「<span class="text-blue-600">資安試煉 2.0：AI 時代考驗</span>」。<br>
+                            精通台灣《人工智慧基本法》草案精神，於個人資料保護、<br>
+                            AI 虛假訊息辨識、數位公民素養等領域展現卓越知能。<br>
+                            特頒此證，肯定其保護數位環境之貢獻。
+                        </p>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-4 max-w-2xl mx-auto mb-16">
+                        <div class="p-6 bg-slate-50 rounded-3xl border-2 border-yellow-100">
+                            <span class="text-4xl block mb-2">🛡️</span>
+                            <span class="text-sm font-black text-slate-400">個資保護</span>
+                        </div>
+                        <div class="p-6 bg-slate-50 rounded-3xl border-2 border-yellow-100">
+                            <span class="text-4xl block mb-2">⚖️</span>
+                            <span class="text-sm font-black text-slate-400">法律素養</span>
+                        </div>
+                        <div class="p-6 bg-slate-50 rounded-3xl border-2 border-yellow-100">
+                            <span class="text-4xl block mb-2">🔍</span>
+                            <span class="text-sm font-black text-slate-400">真偽辨識</span>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col md:flex-row justify-between items-center px-10 gap-8">
+                        <div class="text-center md:text-left">
+                            <p class="text-slate-400 text-sm mb-1 uppercase tracking-widest font-bold">Issue Date</p>
+                            <p id="currentDate" class="text-2xl font-black text-slate-800">2024.03.25</p>
+                        </div>
+                        <div class="relative w-48 h-48">
+                            <svg viewBox="0 0 200 200" class="w-full h-full animate-[spin_20s_linear_infinite]">
+                                <path id="curve" fill="transparent" d="M 100, 100 m -75, 0 a 75,75 0 1,0 150,0 a 75,75 0 1,0 -150,0" />
+                                <text class="text-[14px] font-bold fill-red-600">
+                                    <textPath xlink:href="#curve">● 網路冒險學院最高榮譽認證 ● CYBER SAFETY ACADEMY HONOR</textPath>
+                                </text>
+                            </svg>
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <span class="text-5xl">🎖️</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mt-16 no-print flex flex-col items-center gap-6">
+            <button onclick="window.print()" class="group relative px-12 py-6 bg-white text-slate-900 font-black text-3xl rounded-[2rem] shadow-2xl hover:scale-105 transition-all flex items-center gap-4">
+                <span class="group-hover:rotate-12 transition-transform">🖨️</span> 列印正式大證書
+            </button>
+            <button onclick="location.reload()" class="text-blue-300 underline font-bold text-lg opacity-70 hover:opacity-100">重新挑戰</button>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                category: "⚖️ 法律與政策 (Policy)",
+                icon: "📜",
+                text: "台灣 2024 年提出《人工智慧基本法》草案，其中特別強調發展 AI 時要「降低風險」。下列哪項行為最符合這項精神？",
+                options: [
+                    { text: "為了讓 AI 更聰明，把班上所有同學的電話跟住址都餵給它練習", correct: false, feedback: "不對喔！這違反了草案中重視的「隱私與個資保護」。" },
+                    { text: "在使用 AI 生成結果時，標註這是由 AI 輔助產出的內容", correct: true, feedback: "正確！這符合透明化與降低誤導風險的精神。" },
+                    { text: "完全相信 AI 給出的所有法律建議，不需要再查證", correct: false, feedback: "錯誤！AI 可能會產生幻覺，盲目相信反而會增加法律風險。" }
+                ]
+            },
+            {
+                category: "🛡️ 個資保護 (Privacy)",
+                icon: "🕵️",
+                text: "你在使用最新的 AI 繪圖軟體時，它要求你「上傳手機通訊錄」才能解鎖更多濾鏡。根據資安素養，你該怎麼做？",
+                options: [
+                    { text: "為了畫出漂亮的圖，沒關係就給它吧", correct: false, feedback: "小心！這屬於「過度蒐集個資」，與軟體功能無關的資料不應提供。" },
+                    { text: "拒絕提供，並改用其他不需要敏感權限的軟體", correct: true, feedback: "沒錯！保護個資應從拒絕不合理的資料要求開始。" },
+                    { text: "反正我的通訊錄沒什麼秘密，給了也沒差", correct: false, feedback: "你雖然沒差，但你通訊錄裡好朋友跟家人的隱私就這樣被你洩漏了喔！" }
+                ]
+            },
+            {
+                category: "🤖 AI 真偽辨識 (Deepfake)",
+                icon: "👁️",
+                text: "你在社群媒體看到一段影片，內容是總統宣布「全台灣學生從明天起永遠放假」，但影片人物講話時嘴型稍微有點對不上。你該怎麼辦？",
+                options: [
+                    { text: "太棒了！趕快分享到班級群組讓大家高興", correct: false, feedback: "別急！這可能是 Deepfake 假影片，未經查證轉傳會散布恐慌或假消息。" },
+                    { text: "觀察光影、聲音與嘴型，並去官方新聞網站查證", correct: true, feedback: "專業！具備辨識 AI 偽造的能力是小六學生必備的資訊素養。" },
+                    { text: "留言罵總統為什麼要放這麼多假", correct: false, feedback: "在還沒確定消息真假前就開罵，容易成為假訊息的受害者。" }
+                ]
+            },
+            {
+                category: "📷 數位足跡 (Digital Footprint)",
+                icon: "👣",
+                text: "你想在網路上發布一張出去玩的照片，但背景拍到了陌生人的車牌跟路人的臉。根據法律素養，最好的做法是？",
+                options: [
+                    { text: "直接發布，反正我拍的是風景不是他們", correct: false, feedback: "這可能侵犯了他人的肖像權與隱私權喔！" },
+                    { text: "利用遮蓋或模糊工具將路人的臉與車牌處理掉再發布", correct: true, feedback: "正確！尊重他人的隱私是優良數位公民的表現。" },
+                    { text: "只發給好朋友看，就不用處理了", correct: false, feedback: "只要傳到網路上，就有被轉發出去的風險，還是處理一下比較保險。" }
+                ]
+            },
+            {
+                category: "🔒 帳號防護 (Security)",
+                icon: "🔑",
+                text: "你知道「二階段驗證 (2FA)」對帳號安全很重要。下列關於 2FA 的描述何者正確？",
+                options: [
+                    { text: "只要有了 2FA，密碼設成 123456 也沒關係", correct: false, feedback: "密碼是第一道防線，還是要設得夠強壯才行！" },
+                    { text: "即使密碼洩漏，駭客沒有第二道驗證碼也無法登入", correct: true, feedback: "完全正確！這是目前保護帳號最有效的進階方法。" },
+                    { text: "2FA 只有大人才需要用，學生不用這麼麻煩", correct: false, feedback: "學生的遊戲跟社群帳號也是駭客的目標，一樣需要保護。" }
+                ]
+            }
+        ];
+
+        let currentQuestion = 0;
+        let playerName = "";
+
+        // 設定今日日期
+        const today = new Date();
+        document.getElementById('currentDate').innerText = `${today.getFullYear()}.${String(today.getMonth() + 1).padStart(2, '0')}.${String(today.getDate()).padStart(2, '0')}`;
+
+        function startGame() {
+            const nameInput = document.getElementById('playerName');
+            if (!nameInput.value.trim()) {
+                alert("請留下英雄的名號！");
+                return;
+            }
+            playerName = nameInput.value.trim();
+            document.getElementById('startScreen').classList.add('hidden');
+            document.getElementById('quizScreen').classList.remove('hidden');
+            showQuestion();
+        }
+
+        function showQuestion() {
+            const q = questions[currentQuestion];
+            document.getElementById('questionCategory').innerText = q.category;
+            document.getElementById('questionText').innerText = q.text;
+            document.getElementById('questionIcon').innerText = q.icon;
+            
+            const container = document.getElementById('optionsContainer');
+            container.innerHTML = '';
+            
+            q.options.forEach((opt) => {
+                const btn = document.createElement('button');
+                btn.className = "option-btn w-full text-left p-6 rounded-2xl bg-white/5 text-white text-xl font-medium";
+                btn.innerText = opt.text;
+                btn.onclick = () => checkAnswer(opt);
+                container.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(opt) {
+            const quizScreen = document.getElementById('quizScreen');
+            const feedbackScreen = document.getElementById('feedbackScreen');
+            
+            quizScreen.classList.add('hidden');
+            feedbackScreen.classList.remove('hidden');
+            
+            if (opt.correct) {
+                document.getElementById('feedbackIcon').innerText = "✨";
+                document.getElementById('feedbackTitle').innerText = "卓越的解析！";
+                document.getElementById('feedbackTitle').className = "text-5xl font-black mb-6 text-emerald-400";
+                document.getElementById('feedbackText').innerText = opt.feedback;
+                
+                document.getElementById(`seal-${currentQuestion}`).classList.add('unlocked');
+                
+                currentQuestion++;
+                const progress = (currentQuestion / questions.length) * 100;
+                document.getElementById('progressBar').style.width = `${progress}%`;
+                document.getElementById('progressText').innerText = `${Math.round(progress)}%`;
+
+                document.getElementById('nextBtn').innerText = currentQuestion === questions.length ? "領取傳奇證書" : "進入下一階段";
+                document.getElementById('nextBtn').onclick = currentQuestion === questions.length ? showCertificate : nextQuestion;
+                
+                confetti({
+                    particleCount: 150,
+                    spread: 90,
+                    origin: { y: 0.6 },
+                    colors: ['#3b82f6', '#10b981', '#fbbf24']
+                });
+            } else {
+                document.getElementById('feedbackIcon').innerText = "🚫";
+                document.getElementById('feedbackTitle').innerText = "分析錯誤！";
+                document.getElementById('feedbackTitle').className = "text-5xl font-black mb-6 text-rose-500";
+                document.getElementById('feedbackText').innerText = opt.feedback;
+                document.getElementById('nextBtn').innerText = "重新修正邏輯";
+                document.getElementById('nextBtn').onclick = () => {
+                    feedbackScreen.classList.add('hidden');
+                    quizScreen.classList.remove('hidden');
+                };
+            }
+        }
+
+        function nextQuestion() {
+            document.getElementById('feedbackScreen').classList.add('hidden');
+            document.getElementById('quizScreen').classList.remove('hidden');
+            showQuestion();
+        }
+
+        function showCertificate() {
+            document.getElementById('feedbackScreen').classList.add('hidden');
+            document.getElementById('gameContainer').classList.add('hidden');
+            document.getElementById('certificateScreen').classList.remove('hidden');
+            document.getElementById('certPlayerName').innerText = playerName;
+            
+            // 終極煙火效果
+            var end = Date.now() + (3 * 1000);
+            (function frame() {
+              confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0 }, colors: ['#fbbf24', '#3b82f6'] });
+              confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 }, colors: ['#fbbf24', '#3b82f6'] });
+              if (Date.now() < end) { requestAnimationFrame(frame); }
+            }());
+        }
+    </script>
+</body>
+</html>
